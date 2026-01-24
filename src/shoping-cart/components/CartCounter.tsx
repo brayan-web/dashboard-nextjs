@@ -1,32 +1,69 @@
-'use client'
+"use client";
 
+import { useAppDispatch, useAppSelector } from "@/store";
+import React, { useEffect } from "react";
+import { addOne, subtractOne, resetCount, initCounterState } from "@/store/counter/counterSlice";
 
-import React from 'react'
-import { useState } from "react"
+interface Props {
+  value?: number;
+}
 
-interface Props  {
-    value?: number
+export interface CounterResponse{
+  method: string;
+  count: number;
+}
+
+const getApiCounter = async(): Promise<CounterResponse> => {
+  const data = await fetch('/api/counter').then(res => res.json());
+  console.log(data)
+
+  return data;
 }
 
 export const CartCounter = ({ value = 0 }: Props) => {
-      const [ count, setCount ] = useState(value);
+  // const [count, setCount] = useState(value);
 
-    const Increment = () => {
-            setCount(count + 1)
-    }
- const Decrement = () => {
-            setCount(count - 1)
-    }
+  
+  const count = useAppSelector(state => state.counter.count)
+  const dispatch = useAppDispatch();
+  // useEffect(() =>{
+  //   dispatch(initCounterState(value))
+  // }, [dispatch, value])
+
+    useEffect(() =>{
+      getApiCounter()
+      .then(({count}) => dispatch(initCounterState(count)))
+  }, [dispatch])
+
+
+  const Increment = () => {
+    dispatch( addOne() )
+  };
+  const Decrement = () => {
+    dispatch( subtractOne() )
+  };
 
   return (
-    <div>
-      <span className="text-8xl text-center">{count}</span>
-        <div className="flex justify-center space-x-2">
-            <button onClick={Decrement} className="bg-slate-600 text-white py-1 px-5 rounded-md cursor-pointer hover:bg-black/10">-</button>
-                <button onClick={Increment} className="bg-slate-600 text-white py-1 px-5 rounded-md cursor-pointer">+</button>
-        </div>
+    <div className="flex justify-center items-center">
+      <div>
+        <button
+        onClick={Decrement}
+        className="bg-gray-300  text-gray-600 py-1 px-5 font-light  cursor-pointer hover:bg-gray-400 text-8xl"
+      >
+        -
+      </button>
+      </div>
+      <div className="flex items-center text-6xl text-center font-semibold bg-gray-300 text-gray-600 h-full px-11">
+        {count}
+      </div>
+  <div>
+        <button
+        onClick={Increment}
+        className="bg-gray-300 text-gray-600 py-1 px-5 font-light  cursor-pointer hover:bg-gray-400 text-8xl"
+      >
+        +
+      </button>
+  </div>
     </div>
-  )
-}
-
-
+  );
+};
